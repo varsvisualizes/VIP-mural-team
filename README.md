@@ -58,6 +58,8 @@ After that, I placed the tissue paper behind the face of the building, between t
 
 Now you're ready to program the Arduino! Reference the Fritzing image pics in the repo for the breadboard set-up, and upload the code labeled BuildingLights_PiezoMusic.ino.
 
+NOTE: I didn't include the blue LED in the instructions because it's just a power LED; once you're confident that your system is powered, you can take it out so all the attention is on the RGB LED. 
+
 # Seed Dispenser
 
 https://user-images.githubusercontent.com/47091936/155765277-57615a12-add1-4221-a758-5ff49b87a217.MOV
