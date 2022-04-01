@@ -1,0 +1,166 @@
+
+#include <FastLED.h>
+
+FASTLED_USING_NAMESPACE
+
+// FastLED "100-lines-of-code" demo reel, showing just a few 
+// of the kinds of animation patterns you can quickly and easily 
+// compose using FastLED.  
+//
+// This example also shows one easy way to define multiple 
+// animations patterns and have them automatically rotate.
+//
+// -Mark Kriegsman, December 2014
+
+#if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
+#warning "Requires FastLED 3.1 or later; check github for latest code."
+#endif
+
+
+
+int statetime = 0;
+bool state = false; 
+
+//distance sensor pins
+const int trigPin = 9;
+const int echoPin = 6;
+
+//for led strip
+#define DATA_PIN    5
+#define DATA_PIN2    3
+//#define CLK_PIN   4
+#define LED_TYPE    WS2811
+#define COLOR_ORDER GRB
+#define NUM_LEDS    77
+CRGB leds[NUM_LEDS];
+
+#define BRIGHTNESS          96
+#define FRAMES_PER_SECOND  120
+
+
+void setup() {
+  // put your setup code here, to run once:
+  delay(3000); // 3 second delay for recovery
+  Serial.begin(9600);
+  
+//setting up LED strip - fast led library:
+  // tell FastLED about the LED strip configuration
+  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<LED_TYPE,DATA_PIN2,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+
+  // set master brightness control
+  FastLED.setBrightness(BRIGHTNESS);
+}
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  // establish variables for duration of the ping,
+  // and the distance result in inches and centimeters:
+  long duration, inches, cm;
+    //check distance
+    
+  //------------------for one distance
+  // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  pinMode(trigPin, OUTPUT);
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, LOW);
+
+  // Read the signal from the sensor: a HIGH pulse whose
+  // duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+  pinMode(echoPin, INPUT);
+  duration = pulseIn(echoPin, HIGH);
+
+  // convert the time into a distance
+  inches = microsecondsToInches(duration);
+  cm = microsecondsToCentimeters(duration);
+//---------------------------/
+//print distances in monitor    
+  Serial.print("check distance: ");   
+  Serial.print(inches);
+  Serial.print(" in, ");
+  Serial.print(cm);
+  Serial.print("cm");
+  Serial.println();
+
+       while (statetime < 10){ //while loop lets animation run before checking distance again
+
+//animate based on distances
+   if (inches <= 38)  {
+      
+        bpm();
+      delay(100);
+    
+  } else if ( inches >38 && inches <=80){
+    juggle();
+    delay(100);
+    
+}   else if ( inches >80 && inches <=200){
+    rainbow();
+    delay(100);
+}
+  else if (inches > 200) { //turns off leds if too far away
+    fill_solid( &(leds[0]), NUM_LEDS /*number of leds*/, CRGB::Black);
+   // FastLED.show();
+  }
+      FastLED.show();
+      delay(10);
+    statetime++; //adds one to while loop
+    }
+    statetime = 0; // resets while loop counter
+
+
+
+}
+
+//recognize distance --- needed for distance sensor to operate and be read
+long microsecondsToInches(long microseconds) {
+  // According to Parallax's datasheet for the PING))), there are
+  // 73.746 microseconds per inch (i.e. sound travels at 1130 feet per
+  // second). This gives the distance travelled by the ping, outbound
+  // and return, so we divide by 2 to get the distance of the obstacle.
+  // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
+  return microseconds / 74 / 2;
+}
+
+long microsecondsToCentimeters(long microseconds) {
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  // The ping travels out and back, so to find the distance of the
+  // object we take half of the distance travelled.
+  return microseconds / 29 / 2;
+}
+
+//animation functions based on fast led library
+void rainbow() 
+{
+  // FastLED's built-in rainbow generator
+  fill_rainbow( leds, NUM_LEDS, gHue, 7);
+}
+void juggle() {
+  // eight colored dots, weaving in and out of sync with each other
+  fadeToBlackBy( leds, NUM_LEDS, 20);
+  byte dothue = 0;
+  for( int i = 0; i < 8; i++) {
+    leds[beatsin16( i+7, 0, NUM_LEDS-1 )] |= CHSV(dothue, 200, 255);
+    dothue += 32;
+  }
+}
+
+void bpm()
+{
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+  uint8_t BeatsPerMinute = 62;
+  CRGBPalette16 palette = PartyColors_p;
+  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
+  for( int i = 0; i < NUM_LEDS; i++) { //9948
+    leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+  }
+  
+}
