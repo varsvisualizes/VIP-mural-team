@@ -2,7 +2,7 @@
 
 This code is intended for use by the NYU VIP Designing for Creative Physical Computing team. Altogether the code will be used as part of an interactive mural installation. 
 
-So far I have put together:
+Here are some of the components built for the mural:
 
 - Buildings that light up and play music upon being triggered by rock-shaped knobs
 - A seed dispenser that dispenses seed-filled confetti upon being triggered by rock-shaped knobs
