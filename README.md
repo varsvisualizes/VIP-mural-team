@@ -27,7 +27,7 @@ I crumpled the paper into roughly a rock shape, using tape to wrap it together a
 
 I would recommend soldering wires to the potentiometer the rock can be distanced from the breadboard. There's no special code for the potentiometer - I just used the Knob example already build into the Arduino IDE. 
 
-Ideally there would be 3 rocks in the mural, so 3 rock potentiometers. The rocks would control a few things in the mural: They'll make some bees sway, they'll change the music and color of the buildings, and they can activate the seed dispenser. 
+Ideally there would be 3 rocks in the mural, so 3 rock potentiometers. The rocks would control a few things in the mural: They'll make some bees sway, and they can activate the seed dispenser. 
 
 More pics can be seen in the Rock Potentiometer images file in the repo! 
 
@@ -56,7 +56,7 @@ Next, I hot glued the two cardboard supports to the face of the building. I laid
 
 After that, I placed the tissue paper behind the face of the building, between the two supports, and I taped it to the inside of the cardboard. This will diffuse the light from the LED.
 
-Now you're ready to program the Arduino! Reference the Fritzing image pics in the repo for the breadboard set-up, and upload the code labeled BuildingLights_PiezoMusic.ino.
+Now you're ready to program the Arduino! Reference the Fritzing image pics in the repo for the breadboard set-up, and upload the code labeled BuildingLights_PiezoMusic.ino. This code also activates particular tones when the flowers are touched. 
 
 NOTE: I didn't include the blue LED in the instructions because it's just a power LED; once you're confident that your system is powered, you can take it out so all the attention is on the RGB LED. 
 
