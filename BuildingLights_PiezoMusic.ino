@@ -2,11 +2,13 @@
    This code will:
 
    - show proposed building illumination colors
-   - play music on the piezo buzzer corresponding to the potentiometers turned
+   - play music on the piezo buzzer based on a timer
+   - play a particular note when a flower is pressed
 
-   This will demo some Easter egg ideas and get the buildings glowing.
+   When the flowers are not interacted with, the buildings will play music patterns and display colors based on a timer. 
+   If the flowers are being touched, this will override the building timer and just play the note corresponding to the flower.
 
-   These are the notes used for the music:
+   These are the notes used for the music when the buildings are running on a timer:
 
    NOTE_D6 1175
    NOTE_F 1480
@@ -14,9 +16,14 @@
    NOTE_B 1976
    NOTE_D7 2349
 
-   10 Dec 2021
+   6 May 2022
+   Sarva Kompella
+   Sophie Lowen
    Carmen Vargas
 */
+
+#include <ADCTouch.h>
+#include "pitches.h"
 
 // initialize pins
 
@@ -28,155 +35,214 @@ int bluePin = 11;
 // piezo buzzer
 int speakerPin = 5;
 
-// 'stone' potentiometer
-int potPin1 = A0;
+// timer
+unsigned long startTime;
+unsigned long currentTime;
 
-// trimpot 1
-int potPin2 = A1;
+// set intervals to trigger different light / music patterns
+int intervalLength = 500;
+int interval1 = (intervalLength * 5);
+int interval2 = (intervalLength * 10);
+int interval3 = (intervalLength * 15);
+int interval4 = (intervalLength * 20);
+int interval5 = (intervalLength * 25);
+int interval6 = (intervalLength * 30);
+int interval7 = (intervalLength * 35);
+int interval8 = (intervalLength * 43);
 
-// trimpot 2
-int potPin3 = A2;
+// references values to remove offset
+int ref0;
+int ref1;
+int ref2;
+int ref3;
 
-// define potentiometer values
-int potVal1 = 0;
-int potVal2 = 0;
-int potVal3 = 0;
-
-// define threshold for potentiometer to trip music
-int threshold = 500;
 
 void setup() {
 
+  // start the timer
+  startTime = millis();
+
+  // establish the pins
   pinMode(redPin, OUTPUT);
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
   pinMode(speakerPin, OUTPUT);
 
+  // reference values for the flowers
+  ref0 = ADCTouch.read(A0, 500);
+  ref1 = ADCTouch.read(A1, 500);
+  ref2 = ADCTouch.read(A2, 500);
+  ref3 = ADCTouch.read(A4, 500);
+
   Serial.begin(9600);
 }
 
 void loop() {
-  // get the values for the potentiometers
-  potVal1 = analogRead(potPin1);
-  potVal2 = analogRead(potPin2);
-  potVal3 = analogRead(potPin3);
 
-  Serial.print("PotVal1 = ");
-  Serial.print(potVal1);
-  Serial.print('\t');
-  Serial.print("PotVal2 = ");
-  Serial.print(potVal2);
-  Serial.print('\t');
-  Serial.print("PotVal3 = ");
-  Serial.println(potVal3);
+  // get the touch readings for each capacitor
+  int value0 = ADCTouch.read(A0);
+  int value1 = ADCTouch.read(A1);
+  int value2 = ADCTouch.read(A2);
+  int value3 = ADCTouch.read(A4);
 
-  if (potVal1 > threshold && potVal2 < threshold && potVal3 < threshold) {
+  // remove the offset
+  value0 -= ref0;
+  value1 -= ref1;
+  value2 -= ref2;
+  value3 -= ref3;
 
-    digitalWrite(redPin, LOW);
-    digitalWrite(greenPin, HIGH);
-    digitalWrite(bluePin, HIGH);
+  // use  value of capacitor as a boolean
+  int buttonState1 = (value0 > 40) ;
+  int buttonState2 = (value1 > 40) ;
+  int buttonState3 = (value2 > 40) ;
+  int buttonState4 = (value3 > 40) ;
 
-    tone(speakerPin, 1175, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 2349, (1000 / 4));
-    delay((1000 / 4) * 1.30);
+  // get the current time
+  currentTime = millis();
+
+  if (buttonState1 == 1) {
+    //flower #1
+    Serial.println("pressed");
+    //iterate over notes of melody
+    tone(speakerPin, NOTE_E6);
   }
-  else if (potVal1 < threshold && potVal2 > threshold && potVal3 < threshold) {
-
-    digitalWrite(redPin, HIGH);
-    digitalWrite(greenPin, LOW);
-    digitalWrite(bluePin, HIGH);
-
-    tone(speakerPin, 1480, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1976, (1000 / 4));
-    delay((1000 / 4) * 1.30);
+  else if (buttonState2 == 1) {
+    //flower #2
+    tone(speakerPin, NOTE_G5);
+    Serial.println("pressed");
+  }
+  else if (buttonState3 == 1) {
+    //flower #3
+    tone(speakerPin, NOTE_D7);
+    Serial.println("pressed");
 
   }
-  else if (potVal1 < threshold && potVal2 < threshold && potVal3 > threshold) {
-
-    digitalWrite(redPin, HIGH);
-    digitalWrite(greenPin, HIGH);
-    digitalWrite(bluePin, LOW);
-
-    tone(speakerPin, 1175, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1480, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 2349, (1000 / 4));
-    delay((1000 / 4) * 1.30);
+  else if (buttonState4 == 1) {
+    //flower #4
+    tone(speakerPin, NOTE_B6);
+    Serial.println("pressed");
   }
-  else if (potVal1 > threshold && potVal2 > threshold && potVal3 < threshold) {
+  // if no buttons are pressed, launch the building display & music timer
+  else if (buttonState1 != 1 && buttonState2 != 1 && buttonState3 != 1 && buttonState4 != 1) {
+    if (currentTime - startTime >= interval1 && currentTime - startTime < interval2) {
 
-    digitalWrite(redPin, LOW);
-    digitalWrite(greenPin, LOW);
-    digitalWrite(bluePin, HIGH);
+      Serial.println("Playing interval 1");
 
-    tone(speakerPin, 1976, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1480, (1000 / 4));
-    delay((1000 / 4) * 1.30);
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, HIGH);
+      digitalWrite(bluePin, HIGH);
+
+      tone(speakerPin, 1175, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 2349, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+    }
+    else if (currentTime - startTime >= interval2 && currentTime - startTime < interval3) {
+
+      Serial.println("Playing interval 2");
+
+      digitalWrite(redPin, HIGH);
+      digitalWrite(greenPin, LOW);
+      digitalWrite(bluePin, HIGH);
+
+      tone(speakerPin, 1480, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1976, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+
+    }
+    else if (currentTime - startTime >= interval3 && currentTime - startTime < interval4) {
+
+      Serial.println("Playing interval 3");
+
+      digitalWrite(redPin, HIGH);
+      digitalWrite(greenPin, HIGH);
+      digitalWrite(bluePin, LOW);
+
+      tone(speakerPin, 1175, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1480, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 2349, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+    }
+    else if (currentTime - startTime >= interval4 && currentTime - startTime < interval5) {
+
+      Serial.println("Playing interval 4");
+
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, LOW);
+      digitalWrite(bluePin, HIGH);
+
+      tone(speakerPin, 1976, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1480, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+    }
+    else if (currentTime - startTime >= interval5 && currentTime - startTime < interval6) {
+
+      Serial.println("Playing interval 5");
+
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, HIGH);
+      digitalWrite(bluePin, LOW);
+
+      tone(speakerPin, 2349, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1175, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+    }
+    else if (currentTime - startTime >= interval6 && currentTime - startTime < interval7) {
+
+      Serial.println("Playing interval 6");
+
+      digitalWrite(redPin, HIGH);
+      digitalWrite(greenPin, LOW);
+      digitalWrite(bluePin, LOW);
+
+      tone(speakerPin, 1175, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1480, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+    }
+    else if (currentTime - startTime >= interval7 && currentTime - startTime < interval8) {
+
+      Serial.println("Playing interval 7");
+
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, LOW);
+      digitalWrite(bluePin, LOW);
+
+      tone(speakerPin, 1175, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1480, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 2349, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1760, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+      tone(speakerPin, 1480, (1000 / 4));
+      delay((1000 / 4) * 1.30);
+
+    }
+    else if (currentTime - startTime >= interval8) {
+
+      Serial.println("Resetting intervals");
+
+      startTime = millis();
+
+    }
   }
-  else if (potVal1 > threshold && potVal2 < threshold && potVal3 > threshold) {
-
-    digitalWrite(redPin, LOW);
-    digitalWrite(greenPin, HIGH);
-    digitalWrite(bluePin, LOW);
-
-    tone(speakerPin, 2349, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1175, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-  }
-  else if (potVal1 < threshold && potVal2 > threshold && potVal3 > threshold) {
-
-    digitalWrite(redPin, HIGH);
-    digitalWrite(greenPin, LOW);
-    digitalWrite(bluePin, LOW);
-
-    tone(speakerPin, 1175, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1480, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-  }
-  else if (potVal1 > threshold && potVal2 > threshold && potVal3 > threshold) {
-
-    digitalWrite(redPin, LOW);
-    digitalWrite(greenPin, LOW);
-    digitalWrite(bluePin, LOW);
-
-    tone(speakerPin, 1175, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1480, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 2349, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1760, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-    tone(speakerPin, 1480, (1000 / 4));
-    delay((1000 / 4) * 1.30);
-
-  }
-  else {
-    
-    noTone(speakerPin);
-
-    // Off
-    digitalWrite(redPin, HIGH);
-    digitalWrite(greenPin, HIGH);
-    digitalWrite(bluePin, HIGH);
-  }
-
 }
