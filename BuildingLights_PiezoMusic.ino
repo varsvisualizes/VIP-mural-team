@@ -5,8 +5,8 @@
    - play music on the piezo buzzer based on a timer
    - play a particular note when a flower is pressed
 
-   When the flowers are not interacted with, the buildings will play music patterns and display colors based on a timer.
-   If the flowers are being touched, this will override the building timer and just play the note corresponding to the flower.
+   When the flowers are not interacted with, the buildings will play display colors based on a timer.
+   If the flowers are being touched, this will override the building timer and play music patterns corresponding to the flower.
 
    These are the notes used for the music when the buildings are running on a timer:
 
@@ -46,14 +46,15 @@ unsigned long currentTime;
 
 // set intervals to trigger different light / music patterns
 int intervalLength = 500;
-int interval1 = (intervalLength * 5);
-int interval2 = (intervalLength * 10);
-int interval3 = (intervalLength * 15);
-int interval4 = (intervalLength * 20);
-int interval5 = (intervalLength * 25);
-int interval6 = (intervalLength * 30);
-int interval7 = (intervalLength * 35);
-int interval8 = (intervalLength * 43);
+int intervalStagger = 5;
+int interval1 = (intervalLength * (intervalStagger * 1));
+int interval2 = (intervalLength * (intervalStagger * 2));
+int interval3 = (intervalLength * (intervalStagger * 3));
+int interval4 = (intervalLength * (intervalStagger * 4));
+int interval5 = (intervalLength * (intervalStagger * 5));
+int interval6 = (intervalLength * (intervalStagger * 6));
+int interval7 = (intervalLength * (intervalStagger * 7));
+int interval8 = (intervalLength * (intervalStagger * 8));
 
 // references values to remove offset for the flower sensors
 int ref0;
@@ -108,7 +109,7 @@ void loop() {
   // get the current time
   currentTime = millis();
 
-  if (buttonState1 == 1 && buttonState2 == 0 && buttonState3 == 0) {
+  if (buttonState1 == 1 && buttonState2 != 1 && buttonState3 != 1) {
 
     //flower #1
     Serial.println("pressed 1");
@@ -142,7 +143,7 @@ void loop() {
     delay((1000 / 4) * 1.30);
 
   }
-  else if (buttonState2 == 1 && buttonState1 == 0 && buttonState3 == 0) {
+  else if (buttonState2 == 1 && buttonState1 != 1 && buttonState3 != 1) {
     //flower #2
     Serial.println("pressed 2");
 
@@ -166,6 +167,29 @@ void loop() {
     digitalWrite(greenPin1, HIGH);
     digitalWrite(bluePin1, HIGH);
 
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1976, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+
+  }
+
+  else if (buttonState3 == 1 && buttonState1 != 1 && buttonState2 != 1) {
+    //flower #3
+    Serial.println("pressed 3");
+
+    // bouncing white light between buildings
+
+    digitalWrite(redPin1, HIGH);
+    digitalWrite(greenPin1, HIGH);
+    digitalWrite(bluePin1, HIGH);
+
+    digitalWrite(redPin2, LOW);
+    digitalWrite(greenPin2, LOW);
+    digitalWrite(bluePin2, LOW);
+
     tone(speakerPin, 1175, (1000 / 4));
     delay((1000 / 4) * 1.30);
     tone(speakerPin, 1480, (1000 / 4));
@@ -173,125 +197,121 @@ void loop() {
     tone(speakerPin, 2349, (1000 / 4));
     delay((1000 / 4) * 1.30);
 
-  }
+    delay(150);
 
-else if (buttonState3 == 1 && buttonState1 == 0 && buttonState2 == 0) {
-  //flower #3
-  Serial.println("pressed 3");
-
-  // bouncing white light between buildings
-
-  digitalWrite(redPin1, HIGH);
-  digitalWrite(greenPin1, HIGH);
-  digitalWrite(bluePin1, HIGH);
-
-  digitalWrite(redPin2, LOW);
-  digitalWrite(greenPin2, LOW);
-  digitalWrite(bluePin2, LOW);
-
-  delay(150);
-
-  digitalWrite(redPin2, HIGH);
-  digitalWrite(greenPin2, HIGH);
-  digitalWrite(bluePin2, HIGH);
-
-  digitalWrite(redPin1, LOW);
-  digitalWrite(greenPin1, LOW);
-  digitalWrite(bluePin1, LOW);
-
-  delay(150);
-
-
-  tone(speakerPin, 1976, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 1760, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 1480, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-
-}
-else if (buttonState1 == 1 && buttonState2 == 1 && buttonState3 == 1) {
-
-  tone(speakerPin, 1175, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 1480, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 1760, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 2349, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 1760, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-  tone(speakerPin, 1480, (1000 / 4));
-  delay((1000 / 4) * 1.30);
-
-}
-
-
-//  else if (buttonState4 == 1) {
-//    //flower #4
-//    tone(speakerPin, NOTE_B6);
-//    Serial.println("pressed");
-//  }
-
-
-// if no flowers are pressed, launch the building display & music timer
-else if (buttonState1 != 1 && buttonState2 != 1 && buttonState3 != 1) {
-  if (currentTime - startTime >= interval1 && currentTime - startTime < interval2) {
-
-    Serial.println("Playing interval 1");
-
-    digitalWrite(redPin1, LOW);
-    digitalWrite(greenPin1, HIGH);
-    digitalWrite(bluePin1, HIGH);
-
-    digitalWrite(redPin2, LOW);
+    digitalWrite(redPin2, HIGH);
     digitalWrite(greenPin2, HIGH);
     digitalWrite(bluePin2, HIGH);
 
-  }
-  else if (currentTime - startTime >= interval2 && currentTime - startTime < interval3) {
-
-    Serial.println("Playing interval 2");
-
-    digitalWrite(redPin1, HIGH);
+    digitalWrite(redPin1, LOW);
     digitalWrite(greenPin1, LOW);
-    digitalWrite(bluePin1, HIGH);
-
-    digitalWrite(redPin2, HIGH);
-    digitalWrite(greenPin2, LOW);
-    digitalWrite(bluePin2, HIGH);
-
-  }
-  else if (currentTime - startTime >= interval3 && currentTime - startTime < interval4) {
-
-    Serial.println("Playing interval 3");
-
-    digitalWrite(redPin1, HIGH);
-    digitalWrite(greenPin1, HIGH);
     digitalWrite(bluePin1, LOW);
 
+    tone(speakerPin, 1175, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 2349, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+
+    delay(150);
+
+  }
+  else if (buttonState1 == 1 && buttonState2 == 1 && buttonState3 != 1) {
+    for (int i = 0; i < 200; i += 5) {
+      analogWrite(redPin1, i);
+      digitalWrite(bluePin1, HIGH);
+      digitalWrite(greenPin1, LOW);
+      delay(50);
+    }
+
+    delay(25);
+
+    for (int i = 200; i >= 0; i -= 20) {
+      analogWrite(redPin1, i);
+      digitalWrite(bluePin1, HIGH);
+      digitalWrite(greenPin1, LOW);
+      delay(25);
+    }
+
     digitalWrite(redPin2, HIGH);
     digitalWrite(greenPin2, HIGH);
-    digitalWrite(bluePin2, LOW);
-
-  }
-  else if (currentTime - startTime >= interval4 && currentTime - startTime < interval5) {
-
-    Serial.println("Playing interval 4");
-
-    digitalWrite(redPin1, LOW);
-    digitalWrite(greenPin1, LOW);
-    digitalWrite(bluePin1, HIGH);
-
-    digitalWrite(redPin2, LOW);
-    digitalWrite(greenPin2, LOW);
     digitalWrite(bluePin2, HIGH);
 
-  }
-  else if (currentTime - startTime >= interval5 && currentTime - startTime < interval6) {
+    tone(speakerPin, 1976, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
 
-    Serial.println("Playing interval 5");
+  }
+  else if (buttonState1 == 1 && buttonState2 != 1 && buttonState3 == 1) {
+    for (int i = 0; i < 200; i += 5) {
+      analogWrite(greenPin2, i);
+      digitalWrite(redPin2, HIGH);
+      digitalWrite(bluePin2, LOW);
+      delay(50);
+    }
+
+    delay(25);
+
+    for (int i = 200; i >= 0; i -= 20) {
+      analogWrite(greenPin2, i);
+      digitalWrite(redPin2, HIGH);
+      digitalWrite(bluePin2, LOW);
+      delay(25);
+    }
+
+    digitalWrite(redPin1, HIGH);
+    digitalWrite(greenPin1, HIGH);
+    digitalWrite(bluePin1, HIGH);
+
+    tone(speakerPin, 2349, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1175, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+  }
+  else if (buttonState1 != 1 && buttonState2 == 1 && buttonState3 == 1) {
+
+    digitalWrite(redPin1, HIGH);
+    digitalWrite(bluePin1, LOW);
+    digitalWrite(greenPin1, HIGH);
+
+    digitalWrite(redPin2, LOW);
+    digitalWrite(bluePin2, HIGH);
+    digitalWrite(greenPin2, LOW);
+
+    tone(speakerPin, 1175, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+
+    delay(100);
+    
+    digitalWrite(redPin2, LOW);
+    digitalWrite(bluePin2, LOW);
+    digitalWrite(greenPin2, HIGH);
+
+    digitalWrite(redPin1, HIGH);
+    digitalWrite(bluePin1, HIGH);
+    digitalWrite(greenPin1, LOW);
+
+    tone(speakerPin, 1175, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+
+    delay(100);
+  }
+  else if (buttonState1 == 1 && buttonState2 == 1 && buttonState3 == 1) {
+
 
     digitalWrite(redPin1, LOW);
     digitalWrite(greenPin1, HIGH);
@@ -300,38 +320,127 @@ else if (buttonState1 != 1 && buttonState2 != 1 && buttonState3 != 1) {
     digitalWrite(redPin2, LOW);
     digitalWrite(greenPin2, HIGH);
     digitalWrite(bluePin2, LOW);
-  }
-  else if (currentTime - startTime >= interval6 && currentTime - startTime < interval7) {
 
-    Serial.println("Playing interval 6");
-
-    digitalWrite(redPin1, HIGH);
-    digitalWrite(greenPin1, LOW);
-    digitalWrite(bluePin1, LOW);
-
-    digitalWrite(redPin2, HIGH);
-    digitalWrite(greenPin2, LOW);
-    digitalWrite(bluePin2, LOW);
-  }
-  else if (currentTime - startTime >= interval7 && currentTime - startTime < interval8) {
-
-    Serial.println("Playing interval 7");
-
-    digitalWrite(redPin1, LOW);
-    digitalWrite(greenPin1, LOW);
-    digitalWrite(bluePin1, LOW);
-
-    digitalWrite(redPin2, LOW);
-    digitalWrite(greenPin2, LOW);
-    digitalWrite(bluePin2, LOW);
+    tone(speakerPin, 1175, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 2349, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1760, (1000 / 4));
+    delay((1000 / 4) * 1.30);
+    tone(speakerPin, 1480, (1000 / 4));
+    delay((1000 / 4) * 1.30);
 
   }
-  else if (currentTime - startTime >= interval8) {
 
-    Serial.println("Resetting intervals");
 
-    startTime = millis();
+  //  else if (buttonState4 == 1) {
+  //    //flower #4
+  //    tone(speakerPin, NOTE_B6);
+  //    Serial.println("pressed");
+  //  }
 
+
+  // if no flowers are pressed, launch the building display & music timer
+  else if (buttonState1 != 1 && buttonState2 != 1 && buttonState3 != 1) {
+    if (currentTime - startTime >= interval1 && currentTime - startTime < interval2) {
+
+      Serial.println("Playing interval 1");
+
+      digitalWrite(redPin1, LOW);
+      digitalWrite(greenPin1, HIGH);
+      digitalWrite(bluePin1, HIGH);
+
+      digitalWrite(redPin2, LOW);
+      digitalWrite(greenPin2, HIGH);
+      digitalWrite(bluePin2, HIGH);
+
+    }
+    else if (currentTime - startTime >= interval2 && currentTime - startTime < interval3) {
+
+      Serial.println("Playing interval 2");
+
+      digitalWrite(redPin1, HIGH);
+      digitalWrite(greenPin1, LOW);
+      digitalWrite(bluePin1, HIGH);
+
+      digitalWrite(redPin2, HIGH);
+      digitalWrite(greenPin2, LOW);
+      digitalWrite(bluePin2, HIGH);
+
+    }
+    else if (currentTime - startTime >= interval3 && currentTime - startTime < interval4) {
+
+      Serial.println("Playing interval 3");
+
+      digitalWrite(redPin1, HIGH);
+      digitalWrite(greenPin1, HIGH);
+      digitalWrite(bluePin1, LOW);
+
+      digitalWrite(redPin2, HIGH);
+      digitalWrite(greenPin2, HIGH);
+      digitalWrite(bluePin2, LOW);
+
+    }
+    else if (currentTime - startTime >= interval4 && currentTime - startTime < interval5) {
+
+      Serial.println("Playing interval 4");
+
+      digitalWrite(redPin1, LOW);
+      digitalWrite(greenPin1, LOW);
+      digitalWrite(bluePin1, HIGH);
+
+      digitalWrite(redPin2, LOW);
+      digitalWrite(greenPin2, LOW);
+      digitalWrite(bluePin2, HIGH);
+
+    }
+    else if (currentTime - startTime >= interval5 && currentTime - startTime < interval6) {
+
+      Serial.println("Playing interval 5");
+
+      digitalWrite(redPin1, LOW);
+      digitalWrite(greenPin1, HIGH);
+      digitalWrite(bluePin1, LOW);
+
+      digitalWrite(redPin2, LOW);
+      digitalWrite(greenPin2, HIGH);
+      digitalWrite(bluePin2, LOW);
+    }
+    else if (currentTime - startTime >= interval6 && currentTime - startTime < interval7) {
+
+      Serial.println("Playing interval 6");
+
+      digitalWrite(redPin1, HIGH);
+      digitalWrite(greenPin1, LOW);
+      digitalWrite(bluePin1, LOW);
+
+      digitalWrite(redPin2, HIGH);
+      digitalWrite(greenPin2, LOW);
+      digitalWrite(bluePin2, LOW);
+    }
+    else if (currentTime - startTime >= interval7 && currentTime - startTime < interval8) {
+
+      Serial.println("Playing interval 7");
+
+      digitalWrite(redPin1, LOW);
+      digitalWrite(greenPin1, LOW);
+      digitalWrite(bluePin1, LOW);
+
+      digitalWrite(redPin2, LOW);
+      digitalWrite(greenPin2, LOW);
+      digitalWrite(bluePin2, LOW);
+
+    }
+    else if (currentTime - startTime >= interval8) {
+
+      Serial.println("Resetting intervals");
+
+      startTime = millis();
+
+    }
   }
-}
 }
