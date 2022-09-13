@@ -4,6 +4,8 @@ This code is intended for use by the NYU VIP Designing for Creative Physical Com
 
 Use the following link to follow the blog record of our mural! https://wp.nyu.edu/creativephyscomp/category/arduiknow/
 
+![VIP-Mural-Sept2022](https://user-images.githubusercontent.com/47091936/190029610-b8bfeef7-3a47-4a2e-80d0-27eba6d0a745.jpg)
+
 # Musical Building
 
 https://user-images.githubusercontent.com/47091936/155765102-84180c1e-27b5-4fd9-a02a-19f4647561f0.mov
